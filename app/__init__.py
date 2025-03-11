@@ -18,6 +18,8 @@ from app.pluggin.subtract import SubtractCommand
 from app.pluggin.multiply import MultiplyCommand
 from app.pluggin.divide import DivideCommand
 from app.pluggin.mean import MeanCommand
+from app.pluggin.history import HistoryCommand
+
 
 
 
