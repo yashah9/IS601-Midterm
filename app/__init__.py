@@ -77,6 +77,7 @@ class App:
         self.command_handler.register_command("multiply", MultiplyCommand())
         self.command_handler.register_command("divide", DivideCommand())
         self.command_handler.register_command("mean", MeanCommand())
+        self.command_handler.register_command("history", HistoryCommand(self.history_df))
 
 
     def display_menu(self):
