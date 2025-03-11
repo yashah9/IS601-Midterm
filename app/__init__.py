@@ -17,6 +17,7 @@ from app.pluggin.add import AddCommand
 from app.pluggin.subtract import SubtractCommand
 from app.pluggin.multiply import MultiplyCommand
 from app.pluggin.divide import DivideCommand
+from app.pluggin.mean import MeanCommand
 
 
 
@@ -75,7 +76,8 @@ class App:
         self.command_handler.register_command("subtract", SubtractCommand())
         self.command_handler.register_command("multiply", MultiplyCommand())
         self.command_handler.register_command("divide", DivideCommand())
-        
+        self.command_handler.register_command("mean", MeanCommand())
+
 
     def display_menu(self):
         """Display available commands in the menu."""
@@ -84,6 +86,8 @@ class App:
         print("2. subtract                   - Subtract two numbers")
         print("3. multiply                   - Multiply two numbers")
         print("4. divide                     - Divide two numbers")
+        print("5. mean                       - Calculate mean of provided numbers")
+        print("6. history                    - History of maximum 10 commands")
         print("Type 'exit' to exit the application.")
         print("Dummy Format: add 3 4")
 
@@ -119,6 +123,15 @@ class App:
             except ValueError:
                 logging.error("Invalid input for numbers.")
                 print("Please enter valid numbers.")
+    
+    def show_history(self):
+        """Display the history of commands using tabulate for a table-like format."""
+        if self.history_df.empty:
+            print("No command history available.")
+        else:
+            # Use tabulate to create a nicely formatted table
+            print("\nCommand History:")
+            print(tabulate(self.history_df.values, headers=["Command"], tablefmt="fancy_grid"))
 
 
     def start(self):
