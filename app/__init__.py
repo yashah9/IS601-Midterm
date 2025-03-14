@@ -21,8 +21,6 @@ from app.pluggin.mean import MeanCommand
 from app.pluggin.history import HistoryCommand
 
 
-
-
 class App:
     """Main application class to manage command execution."""
 
@@ -34,7 +32,8 @@ class App:
         self.settings = dict(os.environ)
         self.settings.setdefault('ENVIRONMENT', 'PRODUCTION')
         self.command_handler = CommandHandler()
-        self.history_df = pd.DataFrame(columns=["Command"])  # Initialize an empty DataFrame for history
+        # Initialize an empty DataFrame for history
+        self.history_df = pd.DataFrame(columns=["Command"])
         self.register_commands()
         self.load_startup_history()
 
@@ -81,7 +80,6 @@ class App:
         self.command_handler.register_command("mean", MeanCommand())
         self.command_handler.register_command("history", HistoryCommand(self.history_df))
 
-
     def display_menu(self):
         """Display available commands in the menu."""
         print("Available Commands:")
@@ -100,15 +98,14 @@ class App:
         command = parts[0]
         args = parts[1:]
 
-        # pylint: disable=unnecessary-dunder-call, invalid-name
         if command in self.command_handler.commands:
             try:
                 result = self.command_handler.execute_command(command, *args)
                 print(result)
+                # Add command to history (the add_to_history method will update in place)
                 history_command = self.command_handler.commands.get("history")
                 history_command.add_to_history(cmd_input)
 
-            # pylint: disable=broad-exception-caught
             except Exception as e:
                 logging.error("Error executing command: %s", e)
                 print(f"Error: {e}")
@@ -132,10 +129,8 @@ class App:
         if self.history_df.empty:
             print("No command history available.")
         else:
-            # Use tabulate to create a nicely formatted table
             print("\nCommand History:")
             print(tabulate(self.history_df.values, headers=["Command"], tablefmt="fancy_grid"))
-
 
     def start(self):
         """Start the REPL for command input."""
@@ -155,7 +150,12 @@ class App:
         except KeyboardInterrupt:
             logging.info("Application interrupted and exiting gracefully.")
         finally:
+            # Automatically save history on exit
+            history_command = self.command_handler.commands.get("history")
+            if history_command:
+                history_command.save_history("history.csv")
             logging.info("Application shutdown.")
+
 
 if __name__ == "__main__":
     app = App()

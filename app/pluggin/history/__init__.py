@@ -1,8 +1,8 @@
 """
-
 This module contains the implementation of the HistoryCommand class,
 which retrieves and displays the history of executed commands.
 """
+
 import os
 import pandas as pd
 from tabulate import tabulate
@@ -33,24 +33,21 @@ class HistoryCommand(Command):
 
         return "Invalid history command. Available commands: show, save, load, clear, delete."
 
-
     def show_history(self):
         """Display the history of commands using tabulate for a table-like format."""
         if self.history_df.empty:
             return "No command history available."
 
-        # Use tabulate to format the DataFrame as a table
+        # Format the DataFrame as a table using tabulate
         return tabulate(self.history_df.values, headers=["Command"], tablefmt="fancy_grid")
 
     def add_to_history(self, command_str):
         """Add a new command to the history, except for history management commands."""
-        # Exclude history commands (save, load, clear, delete) from being added to the history
         if command_str.startswith("history"):
             return
 
-        # Add the command to the DataFrame
-        new_entry = pd.DataFrame([[command_str]], columns=["Command"])
-        self.history_df = pd.concat([self.history_df, new_entry], ignore_index=True)
+        # Update the DataFrame in place by adding a new row
+        self.history_df.loc[len(self.history_df)] = command_str
 
     def save_history(self, filename="history.csv"):
         """Save the history to a CSV file."""
@@ -60,16 +57,21 @@ class HistoryCommand(Command):
         return f"History saved to {filename}."
 
     def load_history(self, filename="history.csv"):
-        """Load the history from a CSV file."""
+        """Load the history from a CSV file, updating the DataFrame in place."""
         if os.path.exists(filename):
-            self.history_df = pd.read_csv(filename)
+            loaded_df = pd.read_csv(filename)
+            # Clear the existing DataFrame while keeping its reference intact
+            self.history_df.drop(self.history_df.index, inplace=True)
+            # Append each command from the loaded DataFrame
+            for command in loaded_df["Command"]:
+                self.history_df.loc[len(self.history_df)] = command
             return f"History loaded from {filename}."
 
         return f"History file '{filename}' not found."
 
     def clear_history(self):
-        """Clear the in-memory history."""
-        self.history_df = pd.DataFrame(columns=["Command"])
+        """Clear the in-memory history while preserving the DataFrame reference."""
+        self.history_df.drop(self.history_df.index, inplace=True)
         return "History cleared."
 
     def delete_history(self, filename="history.csv"):
